@@ -1,0 +1,65 @@
+package practice;
+
+import java.util.List;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class getjobdetailojas {
+		static int i;
+		static int j;
+	public static void main(String[] args) 
+	{
+		FirefoxDriver driver=new FirefoxDriver();
+		String url="https://ojas.gujarat.gov.in/";
+		driver.get(url);
+		
+		driver.findElement(By.linkText("Apply Online")).click();
+		Select jobcode=new Select(driver.findElement(By.id("ddlDept")));
+		jobcode.selectByValue("2");
+		
+		//WebDriverWait wait=new WebDriverWait(driver,120);
+		//WebElement elment1=wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//table[@id='dgJobList']/tbody/tr")));
+		
+		List<WebElement> totaljob=driver.findElements(By.xpath("//table[@id='dgJobList']/tbody/tr"));
+		List<WebElement> jobdetail=driver.findElements(By.xpath("//table[@id='dgJobList']/tbody/tr[2]/td"));
+		
+		int jobcount=totaljob.size();
+		int colcount=jobdetail.size();
+		
+		System.out.println("Total Job Available :"+jobcount );
+		System.out.println("Total column :"+colcount);
+		
+		for(i=2;i<jobcount;i++)
+		{
+			for(j=2;j<=colcount;j++)
+			{
+				
+				WebDriverWait wait=new WebDriverWait(driver,120);
+				WebElement elment1=wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//table[@id='dgJobList']/tbody/tr")));
+				WebElement Title=driver.findElement(By.xpath("//table[@id='dgJobList']/tbody/tr[1]/td["+j+"]"));
+				String titledes=Title.getText();
+				//System.out.println("Job Title:"+titledes); 
+				WebElement jobdescription=driver.findElement(By.xpath("//table[@id='dgJobList']/tbody/tr["+i+"]/td["+j+"]"));
+				String jobdes=jobdescription.getText();
+				//System.out.println("Job Description:"+jobdes); 
+				if(j==6 || j==7)
+				{
+					WebElement button=driver.findElement(By.xpath("//table[@id='dgJobList']/tbody/tr["+i+"]/td["+j+"]/input"));
+					button.click();
+					//String joblable=driver.findElement(By.id("LblPost")).getText();
+					String currurl=driver.getCurrentUrl();
+					System.out.println(" URL :"+currurl);
+					driver.navigate().back();
+					
+				}
+				System.out.println(titledes+" :"+jobdes);
+			}
+		}
+		driver.quit();
+	}
+
+}
