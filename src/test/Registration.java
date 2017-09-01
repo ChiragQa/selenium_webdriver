@@ -1,5 +1,11 @@
 package stepDefination;
 
+import static org.testng.Assert.assertEquals;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 //import static org.testng.Assert.*;
 
 import org.openqa.selenium.By;
@@ -16,11 +22,21 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import junit.framework.Assert;
 
 public class Registration {
 	WebDriver driver;
-	
-	
+	String U_name;
+	String U_Pass;
+	/*
+	public void generateuniqNo(){
+
+	DateFormat df = new SimpleDateFormat("ddMMyyHHmmss");
+	Date dateobj = new Date();
+	//String Str = (String)dateobj;
+	//String sUniqNo=Str.replaceAll(/:,"");
+	System.out.println(dateobj);
+	}*/
 	@Given("^User Open Browser$")
 	public void user_Open_Browser(){
 
@@ -104,6 +120,8 @@ public class Registration {
 	@When("^bidder Register with Valid Detail$")
 	public void Register_bidder()
 	{
+			U_name="cucumber_5@localmail.com";
+			U_Pass="auction@123";
 			WebDriverWait wait = new WebDriverWait(driver, 30);
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("txtEmailId")));
 			WebElement wEmailid=driver.findElement(By.id("txtEmailId"));
@@ -127,9 +145,9 @@ public class Registration {
 			WebElement wIagreeCheck=driver.findElement(By.id("iAgree"));
 			WebElement wsubmitBtn=driver.findElement(By.id("btnSubmit"));
 			
-			wEmailid.sendKeys("cucumber_2@localmail.com");
-			wPass.sendKeys("auction@123");
-			wCon_pass.sendKeys("auction@123");
+			wEmailid.sendKeys(U_name);
+			wPass.sendKeys(U_Pass);
+			wCon_pass.sendKeys(U_Pass);
 			new Select(wHintQue).selectByIndex(2);
 			wHintans.sendKeys("Blue");
 			wPerson_name.sendKeys("Cucumber Demo bidder");
@@ -147,16 +165,77 @@ public class Registration {
 			wPanNo.sendKeys("CDM234535SDF");
 			
 			
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("vericode")));
+			wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath("//*[@id='vericode' and contains(text(),'Valid')]"))));
 			
 			wIagreeCheck.click();
 			wsubmitBtn.click();
+			String sReg_comp_msg="Your registration process is completed successfully.Please contact the concerned authority to get the approval on your profile.";
+			WebElement wSuc_msgbody=driver.findElement(By.className("successMsg m-bottom"));
+			String sGetmsg=wSuc_msgbody.getText();
+						
+			if(!sReg_comp_msg.equals(sGetmsg))
+			{
+				System.out.println("Bidder Registration is Pending");
+				Registration Login=new Registration();
+				Login.bidder_Login_with_Username_and_Password();
+				String Uploaddoc_Act_title=driver.getTitle();
+				String Uploaddoc_exp_title="Upload registration supporting document";
+				   if(Uploaddoc_Act_title.equals(Uploaddoc_exp_title))
+				   {
+					//WebDriverWait wait = new WebDriverWait(driver, 10);
+					wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(".//button[contains(text(),'Upload')]")));
+					WebElement complete_reg_btn=driver.findElement(By.xpath(".//button[contains(text(),'Complete Registration')]"));
+					complete_reg_btn.submit();
+					System.out.println("Document Uplaod Successfully");
+				   }
+				
+			}
+			
 	}
-	@Then("^Registration Complete with successful message\\.$")
+	@Then("^Registration Complete with successful message$")
 	public void registration_Complete_with_successful_message()
 	{
-	    // Write code here that turns the phrase above into concrete actions
+		String sReg_comp_exp_msg="Your registration process is completed successfully.Please contact the concerned authority to get the approval on your profile.";
+		WebElement wSuc_msgbody=driver.findElement(By.className("successMsg m-bottom"));
+		String sReg_comp_act_msg=wSuc_msgbody.getText();
+		assertEquals(sReg_comp_act_msg,sReg_comp_exp_msg);
+		System.out.println("Registration complete Successfully , Now login with Officer and Approve this Bidder");
 	}
+	
+	@Given("^User click on Login Page$")
+	public void user_click_on_Login_Page(){
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Login")));
+		WebElement wLoginlink = driver.findElement(By.linkText("Login"));
+		wLoginlink.click();
+	    
+	}
+
+	@When("^bidder Login with Username and Password\\.$")
+	public void bidder_Login_with_Username_and_Password(){
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("j_username")));
+		
+	   WebElement L_username=driver.findElement(By.id("j_username"));
+	   WebElement L_Password=driver.findElement(By.id("j_password"));
+	   WebElement L_submitbtn=driver.findElement(By.name("btnlogin"));
+	   L_username.sendKeys(U_name);
+	   L_Password.sendKeys(U_Pass);
+	   L_submitbtn.click();
+	   
+	}
+
+	@Then("^Loginsuccessful and Redirecting to Homepage\\.$")
+	public void loginsuccessful_and_Redirecting_to_Homepage(){
+		String Exp_PageTitle="Search RFX/Tender";
+		String Act_PageTitle=driver.getTitle();
+		if(Act_PageTitle == Exp_PageTitle)
+		{
+			System.out.println("Title Match And Bidder is on :"+Exp_PageTitle+" Page " );
+		}else
+		System.out.println("Bidder is on :"+Act_PageTitle+" Page " );
+	}
+	
 
 	
 }
